@@ -117,42 +117,80 @@ public class BinTre<T>           // et generisk binærtre
     public int nodetype(int posisjon)
     {
         // TODO: вернуть -1 (если нет в дереве), 1 (если лист), 0 (если внутренний узел)
-        return 0;
+        Node<T> p = finnNode(posisjon);
+
+        if (p == null){
+            return -1;
+        } else if (p.høyre == null && p.venstre == null) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
     }
 
     // --- ЗАДАНИЕ 9 (Oppgave 9) ---
-    public T fjern(int posisjon)
-    {
+    public T fjern(int posisjon) {
         // TODO: удалить узел (только если это лист!) и вернуть его значение
-        return null;
+        Node<T> p = finnNode(posisjon);
+
+        if (p == null || p.venstre != null || p.høyre != null) {
+            throw new IllegalArgumentException();
+        }
+
+        T temp = p.verdi;
+
+
+        if (posisjon == 1) {
+            rot = null;
+        } else {
+            Node<T> q = finnNode(posisjon / 2);
+            if (posisjon % 2 == 0) {
+                q.venstre = null;
+                p.verdi = null;
+            } else {
+                q.høyre = null;
+                q.høyre = null;
+                p.verdi = null;
+            }
+
+
+        }
+        antall--;
+        return temp;
     }
+        // Тест для Задания 1 (Programkode 5.1.5 d)
+        public static void main (String[]args){
+            // Oppgave 2
+            int[] posisjon_tre1 = {1, 2, 3, 5, 6, 7, 10, 11, 12, 13, 21, 24, 25, 42, 43};
+            Character[] verdi_tre1 = {'D', 'I', 'H', 'L', 'O', 'B', 'A', 'E', 'N', 'G', 'K', 'M', 'J', 'F', 'C'};
 
-    // Тест для Задания 1 (Programkode 5.1.5 d)
-    public static void main(String[] args)
-    {
-        // Oppgave 2
-        int[] posisjon_tre1 = {1, 2, 3, 5, 6, 7, 10, 11, 12, 13, 21, 24, 25, 42, 43};
-        Character[] verdi_tre1 = {'D', 'I', 'H', 'L', 'O', 'B', 'A', 'E', 'N', 'G', 'K', 'M', 'J', 'F', 'C'};
+            int[] posisjon_tre2 = {1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 14, 22, 23, 28, 29};
+            Character[] verdi_tre2 = {'E', 'I', 'B', 'G', 'A', 'H', 'K', 'L', 'O', 'D', 'N', 'M', 'C', 'J', 'F'};
 
-        int[] posisjon_tre2 = {1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 14, 22, 23, 28, 29};
-        Character[] verdi_tre2 = {'E', 'I', 'B', 'G', 'A', 'H', 'K', 'L', 'O', 'D', 'N', 'M', 'C', 'J', 'F'};
+            BinTre<Character> tre = new BinTre<>(posisjon_tre1, verdi_tre1);
+            BinTre<Character> tre_2 = new BinTre<>(posisjon_tre2, verdi_tre2);
+            System.out.println("Antall noder: " + tre.antall()); // Должно вывести 22
+            System.out.println("Antall noder: " + tre_2.antall());
 
-        BinTre<Character> tre = new BinTre<>(posisjon_tre1, verdi_tre1);
-        BinTre<Character> tre_2 = new BinTre<>(posisjon_tre2, verdi_tre2);
-        System.out.println("Antall noder: " + tre.antall()); // Должно вывести 22
-        System.out.println("Antall noder: " + tre_2.antall());
+            //Oppgave 3
 
-        //Oppgave 3
+            int[] posisjon_tre1_oppgave_3 = {1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 14, 18, 19, 24, 25, 38, 39};
+            Character[] verdi_tre1_oppgave3 = {'O', 'G', 'B', 'K', 'R', 'E', 'L', 'I', 'A', 'N', 'H', 'J', 'D', 'P', 'C', 'Q', 'M', 'F'};
+            BinTre<Character> tre_oppgave3 = new BinTre<>(posisjon_tre1_oppgave_3, verdi_tre1_oppgave3);
+            System.out.println("Antall noder: " + tre_oppgave3.antall());
 
-        int[] posisjon_tre1_oppgave_3 = {1,2,3,4,5,6,7,9,11,12,13,14,18,19,24,25,38,39};
-        Character[] verdi_tre1_oppgave3 = {'O','G','B','K','R','E','L','I','A','N','H','J','D','P','C','Q','M','F'};
-        BinTre<Character> tre_oppgave3 = new BinTre<>(posisjon_tre1_oppgave_3, verdi_tre1_oppgave3);
-        System.out.println("Antall noder: " + tre_oppgave3.antall());
+            int[] posisjon_tre2_oppgave_3 = {1, 2, 3, 5, 6, 7, 10, 11, 13, 15, 23, 26, 30, 31, 52, 53};
+            Integer[] verdi_tre2_oppgave3 = {10, 3, 7, 13, 2, 1, 5, 15, 19, 10, 10, 8, 5, 6, 9, 11};
+            BinTre<Integer> tre2_oppgave3 = new BinTre<>(posisjon_tre2_oppgave_3, verdi_tre2_oppgave3);
+            System.out.println("Antall noder: " + tre2_oppgave3.antall());
 
-        int[] posisjon_tre2_oppgave_3 = {1, 2, 3, 5, 6, 7, 10, 11, 13, 15, 23, 26, 30, 31, 52, 53};
-        Integer[] verdi_tre2_oppgave3 = {10, 3, 7, 13, 2, 1, 5, 15, 19, 10, 10, 8, 5, 6, 9, 11};
-        BinTre<Integer> tre2_oppgave3 = new BinTre<>(posisjon_tre2_oppgave_3, verdi_tre2_oppgave3);
-        System.out.println("Antall noder: " + tre2_oppgave3.antall());
 
-}
-}
+            // Oppgave 4
+            int[] posisjon_tre_oppgave4 = {1, 2, 3, 5, 10, 11, 22, 23, 44, 47};
+            Integer[] verdi_oppgave4 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            BinTre<Integer> tre_oppgave4 = new BinTre<>(posisjon_tre_oppgave4, verdi_oppgave4);
+            System.out.println("Antall noder: " + tre_oppgave4.antall());
+
+        }
+    }

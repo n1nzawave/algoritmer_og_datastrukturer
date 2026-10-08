@@ -1,0 +1,158 @@
+package hjelpeklasser;
+
+import java.util.*;
+
+public class BinTre<T>           // et generisk binærtre
+{
+    private static final class Node<T>  // en indre nodeklasse
+    {
+        private T verdi;            // nodens verdi
+        private Node<T> venstre;    // referanse til venstre barn/subtre
+        private Node<T> høyre;      // referanse til høyre barn/subtre
+
+        private Node(T verdi, Node<T> v, Node<T> h)    // konstruktør
+        {
+            this.verdi = verdi;
+            venstre = v;
+            høyre = h;
+        }
+
+        private Node(T verdi) { this.verdi = verdi; }  // konstruktør
+    } // class Node<T>
+
+    private Node<T> rot;      // referanse til rotnoden
+    private int antall;       // antall noder i treet
+
+    public BinTre() { rot = null; antall = 0; }          // konstruktør
+
+    // Programkode 5.1.5 c)
+    public BinTre(int[] posisjon, T[] verdi)  // konstruktør
+    {
+        if (posisjon.length > verdi.length) throw new
+                IllegalArgumentException("Verditabellen har for få elementer!");
+
+        for (int i = 0; i < posisjon.length; i++) leggInn(posisjon[i], verdi[i]);
+    }
+
+    public int antall() { return antall; }               // returnerer antallet
+
+    public boolean tom() { return antall == 0; }         // tomt tre?
+
+    // Programkode 5.1.5 b)
+    public final void leggInn(int posisjon, T verdi)
+    {
+        if (posisjon < 1) throw new
+                IllegalArgumentException("Posisjon (" + posisjon + ") < 1!");
+
+        Node<T> p = rot, q = null;    // nodereferanser
+
+        int filter = Integer.highestOneBit(posisjon) >> 1;   // filter = 100...00
+
+        while (p != null && filter > 0)
+        {
+            q = p;
+            p = (posisjon & filter) == 0 ? p.venstre : p.høyre;
+            filter >>= 1;  // bitforskyver filter
+        }
+
+        if (filter > 0) throw new
+                IllegalArgumentException("Posisjon (" + posisjon + ") mangler forelder!");
+        else if (p != null) throw new
+                IllegalArgumentException("Posisjon (" + posisjon + ") finnes fra før!");
+
+        p = new Node<>(verdi);          // ny node
+
+        if (q == null) rot = p;         // tomt tre - ny rot
+        else if ((posisjon & 1) == 0)   // sjekker siste siffer i posisjon
+            q.venstre = p;              // venstre barn til q
+        else
+            q.høyre = p;                // høyre barn til q
+
+        antall++;                       // en ny verdi i treet
+    }
+
+    // Programkode 5.1.5 j)
+    private Node<T> finnNode(int posisjon)  // finner noden med gitt posisjon
+    {
+        if (posisjon < 1) return null;
+
+        Node<T> p = rot;   // nodereferanse
+        int filter = Integer.highestOneBit(posisjon >> 1);   // filter = 100...00
+
+        for (; p != null && filter > 0; filter >>= 1)
+            p = (posisjon & filter) == 0 ? p.venstre : p.høyre;
+
+        return p;   // p blir null hvis posisjon ikke er i treet
+    }
+
+    public boolean finnes(int posisjon)
+    {
+        return finnNode(posisjon) != null;
+    }
+
+    public T hent(int posisjon)
+    {
+        Node<T> p = finnNode(posisjon);
+
+        if (p == null) throw new
+                IllegalArgumentException("Posisjon (" + posisjon + ") finnes ikke i treet!");
+
+        return p.verdi;
+    }
+
+    public T oppdater(int posisjon, T nyverdi)
+    {
+        Node<T> p = finnNode(posisjon);
+
+        if (p == null) throw new
+                IllegalArgumentException("Posisjon (" + posisjon + ") finnes ikke i treet!");
+
+        T gammelverdi = p.verdi;
+        p.verdi = nyverdi;
+
+        return gammelverdi;
+    }
+
+    // --- ЗАДАНИЕ 8 (Oppgave 8) ---
+    public int nodetype(int posisjon)
+    {
+        // TODO: вернуть -1 (если нет в дереве), 1 (если лист), 0 (если внутренний узел)
+        return 0;
+    }
+
+    // --- ЗАДАНИЕ 9 (Oppgave 9) ---
+    public T fjern(int posisjon)
+    {
+        // TODO: удалить узел (только если это лист!) и вернуть его значение
+        return null;
+    }
+
+    // Тест для Задания 1 (Programkode 5.1.5 d)
+    public static void main(String[] args)
+    {
+        // Oppgave 2
+        int[] posisjon_tre1 = {1, 2, 3, 5, 6, 7, 10, 11, 12, 13, 21, 24, 25, 42, 43};
+        Character[] verdi_tre1 = {'D', 'I', 'H', 'L', 'O', 'B', 'A', 'E', 'N', 'G', 'K', 'M', 'J', 'F', 'C'};
+
+        int[] posisjon_tre2 = {1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 14, 22, 23, 28, 29};
+        Character[] verdi_tre2 = {'E', 'I', 'B', 'G', 'A', 'H', 'K', 'L', 'O', 'D', 'N', 'M', 'C', 'J', 'F'};
+
+        BinTre<Character> tre = new BinTre<>(posisjon_tre1, verdi_tre1);
+        BinTre<Character> tre_2 = new BinTre<>(posisjon_tre2, verdi_tre2);
+        System.out.println("Antall noder: " + tre.antall()); // Должно вывести 22
+        System.out.println("Antall noder: " + tre_2.antall());
+
+        //Oppgave 3
+
+        int[] posisjon_tre1_oppgave_3 = {1,2,3,4,5,6,7,9,11,12,13,14,18,19,24,25,38,39};
+        Character[] verdi_tre1_oppgave3 = {'O','G','B','K','R','E','L','I','A','N','H','J','D','P','C','Q','M','F'};
+        BinTre<Character> tre_oppgave3 = new BinTre<>(posisjon_tre1_oppgave_3, verdi_tre1_oppgave3);
+        System.out.println("Antall noder: " + tre_oppgave3.antall());
+
+        int[] posisjon_tre2_oppgave_3 = {1, 2, 3, 5, 6, 7, 10, 11, 13, 15, 23, 26, 30, 31, 52, 53};
+        Integer[] verdi_tre2_oppgave3 = {10, 3, 7, 13, 2, 1, 5, 15, 19, 10, 10, 8, 5, 6, 9, 11};
+        BinTre<Integer> tre2_oppgave3 = new BinTre<>(posisjon_tre2_oppgave_3, verdi_tre2_oppgave3);
+        System.out.println("Antall noder: " + tre2_oppgave3.antall());
+
+}
+}

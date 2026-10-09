@@ -253,6 +253,69 @@ public class BinTre<T>           // et generisk binærtre
         }
     }
 
+    public void postorden(ObjIntConsumer<? super T> oppgave){
+        if (tom()){
+            return;
+        }
+
+        Node<T> p = rot;
+        int k = 1;
+
+
+        while (p.venstre!=null || p.høyre != null){
+            if (p.venstre != null){
+                p = p.venstre;
+                k = k*2;
+            }
+            else {
+                p = p.høyre;
+                k = k*2+1;
+            }
+        }
+
+        while (p!=null){
+            oppgave.accept(p.verdi, k);
+
+            if (k == 1){
+                return;
+            }
+
+
+            p = rot;
+            int filter = Integer.highestOneBit(k >> 1);
+            int n = 0;
+
+            for (; filter > 1; filter >>= 1){
+                if ((filter & k) == 0){
+                    p = p.venstre;
+                    n = n*2;
+                }
+                else {
+                    p = p.høyre;
+                    n = n*2+1;
+                }
+            }
+
+            if (k % 2 == 0 && p.høyre != null){
+                p = p.høyre;
+                k = k+1;
+                while (p.venstre!=null || p.høyre != null){
+                    if (p.venstre != null){
+                        p = p.venstre;
+                        k = k*2;
+                    }
+                    else {
+                        p = p.høyre;
+                        k = k*2+1;
+                    }
+                }
+            }
+            else {
+                k = k/2;
+            }
+        }
+    }
+
         // Тест для Задания 1 (Programkode 5.1.5 d)
         public static void main (String[]args){
             // Oppgave 2

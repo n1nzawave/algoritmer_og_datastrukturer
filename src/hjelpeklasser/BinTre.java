@@ -1,6 +1,7 @@
 package hjelpeklasser;
 
 import java.util.*;
+import java.util.function.ObjIntConsumer;
 
 public class BinTre<T>           // et generisk binærtre
 {
@@ -159,6 +160,99 @@ public class BinTre<T>           // et generisk binærtre
         antall--;
         return temp;
     }
+
+    public void preorden(ObjIntConsumer<? super T> oppgave){
+        if (tom())return;
+
+        Node<T> p = rot;
+        int k = 1;
+
+        while (p != null){
+            oppgave.accept(p.verdi, k);
+
+            if (p.venstre != null){
+                p = p.venstre;
+                k = k*2;
+            } else if (p.høyre != null) {
+                p = p.høyre;
+                k = k*2+1;
+            }
+            else {
+                Node<T> q = null;
+                int m = 0;
+
+                int filter = Integer.highestOneBit(k >> 1);
+
+                p = rot;
+                int n = 1;
+
+                for (; filter > 0; filter >>= 1){
+                    if ((k & filter) == 0){
+                        if (p.høyre != null){
+                            q = p.høyre;
+                            m = 2*n+1;
+                        }
+                        p = p.venstre;
+                        n = n*2;
+                    }
+                    else {
+                        p = p.høyre;
+                        n = n*2+1;
+                    }
+                }
+                p = q;
+                k = m;
+            }
+        }
+    }
+
+    public void inorden(ObjIntConsumer<? super T> oppgave){
+        if (tom())return;
+
+        Node<T> p = rot;
+        int k = 1;
+
+        while (p.venstre != null){
+            p = p.venstre;
+            k = k * 2;
+        }
+        while (p != null){
+            oppgave.accept(p.verdi, k);
+
+            if (p.høyre != null){
+                p = p.høyre;
+                k = k * 2 + 1;
+                while (p.venstre != null){
+                    p = p.venstre;
+                    k = k*2;
+                }
+            }
+            else {
+                Node<T> q = null;
+                int m = 0;
+
+                int filter = Integer.highestOneBit(k >> 1);
+
+                p = rot;
+                int n = 1;
+                for (; filter > 0; filter >>= 1){
+                    if ((filter & k) == 0){
+                        q = p;
+                        m = n;
+                        p = p.venstre;
+                        n = n * 2;
+                    }
+                    else {
+                        p = p.høyre;
+                        n = n * 2 + 1;
+                    }
+                }
+                p = q;
+                k = m;
+            }
+        }
+    }
+
         // Тест для Задания 1 (Programkode 5.1.5 d)
         public static void main (String[]args){
             // Oppgave 2

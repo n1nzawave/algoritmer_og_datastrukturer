@@ -349,5 +349,14 @@ public class BinTre<T>           // et generisk binærtre
             BinTre<Integer> tre_oppgave4 = new BinTre<>(posisjon_tre_oppgave4, verdi_oppgave4);
             System.out.println("Antall noder: " + tre_oppgave4.antall());
 
+            List<Integer> list = new ArrayList<>();
+            int n = 100;
+            for (int i = 1; i <= n; i++){
+                list.add(i);
+            }
+            Collections.shuffle(list);
+
+
+
         }
     }

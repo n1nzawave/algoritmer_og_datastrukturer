@@ -1,14 +1,164 @@
 import eksempelklasser.Heltall;
 import eksempelklasser.Person;
 import hjelpeklasser.*;
+import java.util.*;
 
+// 1. Интерфейс (чтобы класс HeapPrioritetsKø не ругался на implements)
+interface PrioritetsKø<T> {
+    void leggInn(T verdi);
+    T kikk();
+    T taUt();
+    boolean tom();
+    int antall();
+    void nullstill();
+}
+
+        // 2. Основной класс кучи из параграфа 5.3.3
+        static class HeapPrioritetsKø<T> implements PrioritetsKø<T> {
+            private T[] heap;                          // массив кучи
+            private int antall;                        // количество элементов в очереди
+            private Comparator<? super T> comp;        // компаратор для сравнений
+
+            @SuppressWarnings("unchecked")
+            public HeapPrioritetsKø(int kapasitet, Comparator<? super T> c) {
+                if (kapasitet < 0) throw new IllegalArgumentException("Negativ kapasitet!");
+                heap = (T[])new Object[kapasitet + 1];  // нулевой индекс не используется
+                antall = 0;
+                comp = c;
+            }
+
+            public HeapPrioritetsKø(Comparator<? super T> c) {
+                this(8, c);
+            }
+
+            public static <T extends Comparable<? super T>> HeapPrioritetsKø<T> naturligOrden(int kapasitet) {
+                return new HeapPrioritetsKø<>(kapasitet, Comparator.naturalOrder());
+            }
+
+            public static <T extends Comparable<? super T>> HeapPrioritetsKø<T> naturligOrden() {
+                return naturligOrden(8);
+            }
+
+            public int antall() { return antall; }
+            public boolean tom() { return antall == 0; }
+
+            public T kikk() {
+                if (tom()) throw new NoSuchElementException("Køen er tom!");
+                return heap[1];
+            }
+
+            public void nullstill() {
+                for (int i = 0; i <= antall; i++) heap[i] = null;
+                antall = 0;
+            }
+
+            public void leggInn(T verdi) {
+                Objects.requireNonNull(verdi, "verdi er null!");
+                if (++antall == heap.length) heap = Arrays.copyOf(heap, 2*antall);
+
+                int k = antall;
+                heap[0] = verdi;                   // vaktpost (сторож)
+
+                while (comp.compare(verdi, heap[k/2]) < 0) {
+                    heap[k] = heap[k/2];           // сдвигаем родителя вниз
+                    k /= 2;                        // поднимаемся вверх
+                }
+                heap[0] = null;
+                heap[k] = verdi;
+            }
+
+            public T taUt() {
+                if (tom()) throw new NoSuchElementException("Køen er tom!");
+
+                T min = heap[1];                   // сохраняем корень (минимальный элемент)
+                T verdi = heap[antall];            // берем последний элемент массива
+
+                heap[antall] = null;
+                antall--;
+
+                int k = 1;
+                while ((k << 1) < antall) {        // пока у узла есть 2 ребенка
+                    k <<= 1;                       // идем к левому ребенку
+                    // если правый меньше левого, переходим к правому
+                    if (comp.compare(heap[k + 1], heap[k]) < 0) k++;
+                    heap[k >>> 1] = heap[k];       // сдвигаем ребенка вверх
+                }
+
+                if (2*k == antall) {               // если остался только 1 ребенок
+                    k *= 2;
+                    heap[k/2] = heap[k];
+                }
+
+                heap[0] = verdi;                   // опять сторож для вставки сверху вниз
+
+                while (comp.compare(verdi, heap[k/2]) < 0) {
+                    heap[k] = heap[k/2];
+                    k /= 2;
+                }
+                heap[k] = verdi;
+                heap[0] = null;
+                return min;
+            }
+
+            public String minimumsGrenen() {
+                StringBuilder s = new StringBuilder();
+                s.append('[');
+                if (antall > 0) s.append(heap[1]);
+
+                int k = 1;
+                while (2*k < antall) {
+                    k *= 2;
+                    if (comp.compare(heap[k+1], heap[k]) < 0) k++;
+                    s.append(',').append(' ').append(heap[k]);
+                }
+                if (2*k == antall) {
+                    s.append(',').append(' ').append(heap[2*k]);
+                }
+                s.append(']');
+                return s.toString();
+            }
+
+            public String toString() {
+                StringBuilder s = new StringBuilder();
+                s.append('[');
+                if (antall > 0) s.append(heap[1]);
+
+                for (int i = 2; i <= antall; ++i) {
+                    s.append(',').append(' ').append(heap[i]);
+                }
+                s.append(']');
+                return s.toString();
+            }
+        }
 public static void main(String[] args){
-    Kø<Integer> kø = new EnkeltLenketListe<>();
-    for (int i = 1; i <= 10; i++) kø.leggInn(i);
-    while (!kø.tom())
-    {
-        System.out.print(kø.taUt() + " ");
+    int[] a = {3, 5, 4, 10, 5, 8, 18, 12, 17, 11, 10, 14, 9};
+
+    HeapPrioritetsKø<Integer> kø = HeapPrioritetsKø.naturligOrden();
+
+    // 1. Заполняем кучу
+    for (int k : a) {
+        kø.leggInn(k);
     }
+
+    System.out.println("=== ИСХОДНАЯ КУЧА ===");
+    System.out.println("Массив кучи:  " + kø);
+    System.out.println("Минимальная ветвь: " + kø.minimumsGrenen());
+
+    System.out.println("\n=== НАЧИНАЕМ УДАЛЕНИЯ ===");
+
+    // 2. Делаем удаления (taUt) и смотрим, как меняется массив
+    // Сделай эти же шаги на бумаге и сравнивай с выводом консоли!
+
+    System.out.println("Удален элемент: " + kø.taUt());
+    System.out.println("Массив после 1-го удаления: " + kø);
+    System.out.println("Новая минимальная ветвь: " + kø.minimumsGrenen() + "\n");
+
+    System.out.println("Удален элемент: " + kø.taUt());
+    System.out.println("Массив после 2-го удаления: " + kø);
+    System.out.println("Новая минимальная ветвь: " + kø.minimumsGrenen() + "\n");
+
+    System.out.println("Удален элемент: " + kø.taUt());
+    System.out.println("Массив после 3-го удаления: " + kø);
 }
 
 private static void flettesortering(int[] a, int[] b, int fra, int til) {
